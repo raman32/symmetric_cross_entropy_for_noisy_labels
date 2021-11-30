@@ -7,14 +7,14 @@ import sys
 import numpy as np
 import tensorflow as tf
 
-from keras.models import Model
-from keras.layers import Input, Activation, merge, Dense, Flatten
-from keras.layers.convolutional import Conv2D, MaxPooling2D, ZeroPadding2D
-from keras.layers.convolutional import AveragePooling2D
-from keras.layers.normalization import BatchNormalization
-from keras.regularizers import l2
-from keras.layers.merge import add
-from keras import backend as K
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Activation, Dense, Flatten
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, ZeroPadding2D
+from tensorflow.keras.layers import AveragePooling2D
+from tensorflow.keras.layers import BatchNormalization
+from tensorflow.keras.regularizers import l2
+from tensorflow.keras.layers import add
+from tensorflow.keras import backend as K
 
 sys.setrecursionlimit(10000)
 

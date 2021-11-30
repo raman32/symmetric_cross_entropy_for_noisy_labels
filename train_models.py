@@ -4,13 +4,13 @@ from __future__ import print_function
 import os
 import time
 import numpy as np
-import keras.backend as K
+import tensorflow.keras.backend as K
 import argparse
-from keras.utils import np_utils
-from keras.preprocessing.image import ImageDataGenerator
-from keras.models import load_model
-from keras.optimizers import SGD
-from keras.callbacks import ModelCheckpoint
+#from keras.utils import np_utils
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import load_model
+from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.callbacks import ModelCheckpoint
 import tensorflow as tf
 
 from util import get_lr_scheduler
@@ -204,18 +204,18 @@ if __name__ == "__main__":
 
     # MNIST
 
-    # args = parser.parse_args(['-d', 'mnist', '-m', 'sl',
-    #                           '-e', '50', '-b', '128',
-    #                           '-r', '40', '-alpha', '0.01', '-beta', '1.0'])
-    # main(args)
+    args = parser.parse_args(['-d', 'mnist', '-m', 'sl',
+                              '-e', '50', '-b', '128',
+                              '-r', '40', '-alpha', '0.01', '-beta', '1.0'])
+    main(args)
 
 
     # CIFAR-10
 
-    args = parser.parse_args(['-d', 'cifar-10', '-m', 'sl',
-                              '-e', '120', '-b', '128',
-                              '-r', '40', '-alpha', '0.1', '-beta', '1.0'])
-    main(args)
+    # args = parser.parse_args(['-d', 'cifar-10', '-m', 'sl',
+    #                           '-e', '120', '-b', '128',
+    #                           '-r', '40', '-alpha', '0.1', '-beta', '1.0'])
+    # main(args)
 
     # CIFAR-100
 

@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from keras.datasets import mnist, cifar10, cifar100
-from keras.utils import np_utils
+from tensorflow.keras.datasets import mnist, cifar10, cifar100
+import tensorflow.keras.utils as np_utils
 from util import other_class
 from numpy.testing import assert_array_almost_equal
 

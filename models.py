@@ -1,11 +1,11 @@
 import numpy as np
 import tensorflow as tf
-import keras.backend as K
-from keras.models import Model
-from keras.regularizers import l2
-from keras.layers import Input, Conv2D, Dense, MaxPooling2D, Dropout, Flatten, Activation, BatchNormalization
+import tensorflow.keras.backend as K
+from tensorflow.keras.models import Model
+from tensorflow.keras.regularizers import l2
+from tensorflow.keras.layers import Input, Conv2D, Dense, MaxPooling2D, Dropout, Flatten, Activation, BatchNormalization
 from resnet import cifar10_resnet
-from keras.applications.resnet50 import ResNet50
+from tensorflow.keras.applications.resnet50 import ResNet50
 
 def get_model(dataset='mnist', input_tensor=None, input_shape=None, num_classes=10):
     """
