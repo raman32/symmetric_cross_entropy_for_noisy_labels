@@ -4,7 +4,7 @@ from tensorflow.keras.datasets import mnist, cifar10, cifar100
 import tensorflow.keras.utils as np_utils
 from util import other_class
 from numpy.testing import assert_array_almost_equal
-
+from collections import Counter
 # Set random seed
 np.random.seed(123)
 
@@ -50,7 +50,7 @@ def multiclass_noisify(y, P, random_state=0):
     return new_y
 
 
-def get_data(dataset='mnist', noise_ratio=0, asym=False, random_shuffle=False):
+def get_data(dataset='mnist', noise_ratio=40, asym=False, random_shuffle=False, imbalance_type= "exp", imbalance_factor = 1.0):
     """
     Get training images with specified ratio of syn/ayn label noise
     """
@@ -103,18 +103,77 @@ def get_data(dataset='mnist', noise_ratio=0, asym=False, random_shuffle=False):
         return None, None, None, None
 
 
-    X_train = X_train.astype('float32')
-    X_test = X_test.astype('float32')
+    # Seperate Data into different classes
 
+    x_train_seperated = []
+    y_train_seperated = []
+
+    img_max = 0
+    for idx in range(10):
+        filter = y_train == idx
+        x_train_seperated.append(X_train[filter])
+        y_train_seperated.append(y_train[filter])
+        img_max = max(img_max,len(y_train[filter]))
+
+    x_train_seperated = np.array(x_train_seperated,dtype=object)
+    y_train_seperated = np.array(y_train_seperated,dtype=object)
+
+    # Count the current cls nums 
+
+
+    def get_img_num_per_cls(cls_num, imb_type, imb_factor):
+        img_num_per_cls = []
+        if imb_type == 'exp':
+            for cls_idx in range(cls_num):
+                num = img_max * (imb_factor**(cls_idx / (cls_num - 1.0)))
+                img_num_per_cls.append(int(num))
+        elif imb_type == 'step':
+            for cls_idx in range(cls_num // 2):
+                img_num_per_cls.append(int(img_max))
+            for cls_idx in range(cls_num // 2):
+                img_num_per_cls.append(int(img_max * imb_factor))
+        else:
+            img_num_per_cls.extend([int(img_max)] * cls_num)
+        return img_num_per_cls
+
+    print(imbalance_factor)
+    imbalance_ratio = get_img_num_per_cls(10,'exp',imbalance_factor)
+
+    print(imbalance_ratio)
+    x_train_imbalanced = []
+    y_train_imbalanced = []
+
+
+    # Undersampling data to imbalance the datasets
+    for i in range(len(x_train_seperated)):
+        ids = np.arange(len(x_train_seperated[i]))
+        choices = np.random.choice(ids,imbalance_ratio[i])
+        x_train_ = x_train_seperated[i][choices]
+        y_train_ = y_train_seperated[i][choices]
+        x_train_imbalanced.extend(x_train_)
+        y_train_imbalanced.extend(y_train_)
+
+    x_train_imbalanced = np.array(x_train_imbalanced)
+    y_train_imbalanced = np.array(y_train_imbalanced)
+
+    order = np.arange(len(y_train_imbalanced))
+    np.random.shuffle(order)
+    x_train_imbalanced = x_train_imbalanced[order]
+    y_train_imbalanced = y_train_imbalanced[order]
+
+    #X_train = x_train_imbalanced.astype('float32')
+    X_train = x_train_imbalanced.astype('float32')
+    y_train = y_train_imbalanced
+    X_test = X_test.astype('float32')
     y_train_clean = np.copy(y_train)
     # generate random noisy labels
     if noise_ratio > 0:
         if asym:
-            data_file = "data/asym_%s_train_labels_%s.npy" % (dataset, noise_ratio)
+            data_file = "data/asym_%s_train_labels_%s_imbalance_ratio_%s_type_%s.npy" % (dataset, noise_ratio, imbalance_ratio, imbalance_type)
             if dataset == 'cifar-100':
-                P_file = "data/asym_%s_P_value_%s.npy" % (dataset, noise_ratio)
+                P_file = "data/asym_%s_P_value_%s_imbalance_ratio_%s_type_%s.npy" % (dataset, noise_ratio, imbalance_ratio, imbalance_type)
         else:
-            data_file = "data/%s_train_labels_%s.npy" % (dataset, noise_ratio)
+            data_file = "data/%s_train_labels_%s_imbalance_ratio_%s_type_%s.npy" % (dataset, noise_ratio, imbalance_ratio, imbalance_type)
         if os.path.isfile(data_file):
             y_train = np.load(data_file)
             if dataset == 'cifar-100' and asym:
@@ -167,7 +226,7 @@ def get_data(dataset='mnist', noise_ratio=0, asym=False, random_shuffle=False):
 
                 noisy_idx = []
                 for d in range(NUM_CLASSES[dataset]):
-                    noisy_class_index = np.random.choice(class_index[d], class_noisy, replace=False)
+                    noisy_class_index = np.random.choice(class_index[d], class_noisy, replace=True)
                     noisy_idx.extend(noisy_class_index)
 
                 for i in noisy_idx:
@@ -200,9 +259,9 @@ def get_data(dataset='mnist', noise_ratio=0, asym=False, random_shuffle=False):
 
 
 if __name__ == "__main__":
-    X_train, Y_train, X_test, Y_test = get_data(dataset='mnist', noise_ratio=40)
+    X_train, Y_train,y_train_clean, X_test, Y_test = get_data(dataset='mnist', noise_ratio=40)
     Y_train = np.argmax(Y_train, axis=1)
-    (_, Y_clean_train), (_, Y_clean_test) = mnist.load_data()
-    clean_selected = np.argwhere(Y_train == Y_clean_train).reshape((-1,))
-    noisy_selected = np.argwhere(Y_train != Y_clean_train).reshape((-1,))
+    (_, y_clean_train), (_, Y_clean_test) = mnist.load_data()
+    clean_selected = np.argwhere(Y_train == y_train_clean).reshape((-1,))
+    noisy_selected = np.argwhere(Y_train != y_train_clean).reshape((-1,))
     print("#correct labels: %s, #incorrect labels: %s" % (len(clean_selected), len(noisy_selected)))

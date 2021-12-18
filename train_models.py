@@ -27,7 +27,7 @@ for folder in folders:
     if not os.path.exists(path):
         os.makedirs(path)
 
-def train(dataset='mnist', model_name='sl', batch_size=128, epochs=50, noise_ratio=0, asym=False, alpha = 1.0, beta = 1.0):
+def train(dataset='mnist', model_name='sl', batch_size=128, epochs=50, noise_ratio=0, asym=False, alpha = 1.0, beta = 1.0, ir =0.0):
     """
     Train one model with data augmentation: random padding+cropping and horizontal flip
     :param dataset: 
@@ -37,14 +37,15 @@ def train(dataset='mnist', model_name='sl', batch_size=128, epochs=50, noise_rat
     :param noise_ratio: 
     :return: 
     """
-    print('Dataset: %s, model: %s, batch: %s, epochs: %s, noise ratio: %s%%, asymmetric: %s, alpha: %s, beta: %s' %
-          (dataset, model_name, batch_size, epochs, noise_ratio, asym, alpha, beta))
+    print('Dataset: %s, model: %s, batch: %s, epochs: %s, noise ratio: %s%%, asymmetric: %s, alpha: %s, beta: %s, imbalnace factor: %s' %
+          (dataset, model_name, batch_size, epochs, noise_ratio, asym, alpha, beta, ir))
 
     # load data
-    X_train, y_train, y_train_clean, X_test, y_test = get_data(dataset, noise_ratio, asym=asym, random_shuffle=False)
+    X_train, y_train, y_train_clean, X_test, y_test = get_data(dataset, noise_ratio, asym=asym, random_shuffle=False, imbalance_factor = ir)
     n_images = X_train.shape[0]
     image_shape = X_train.shape[1:]
     num_classes = y_train.shape[1]
+    print(y_train)
     print("n_images", n_images, "num_classes", num_classes, "image_shape:", image_shape)
     
     # define P for forward and backward loss
@@ -150,7 +151,7 @@ def train(dataset='mnist', model_name='sl', batch_size=128, epochs=50, noise_rat
                         )
 
 def main(args):
-    train(args.dataset, args.model_name, args.batch_size, args.epochs, args.noise_ratio, args.asym, args.alpha, args.beta)
+    train(args.dataset, args.model_name, args.batch_size, args.epochs, args.noise_ratio, args.asym, args.alpha, args.beta, args.ir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -194,6 +195,11 @@ if __name__ == "__main__":
         help="beta parameter.",
         required=True, type=float
     )
+    parser.add_argument(
+         '-ir', '--ir',
+        help="Imabalnce Ratio",
+        required=False, type=float, default=0.0
+    )
     parser.set_defaults(epochs=150)
     parser.set_defaults(batch_size=128)
     parser.set_defaults(noise_ratio=0)
@@ -204,9 +210,9 @@ if __name__ == "__main__":
 
     # MNIST
 
-    args = parser.parse_args(['-d', 'mnist', '-m', 'sl',
-                              '-e', '50', '-b', '128',
-                              '-r', '40', '-alpha', '0.01', '-beta', '1.0'])
+    args = parser.parse_args(['-d', 'mnist', '-m', 'joint',
+                              '-e', '20', '-b', '128',
+                              '-r', '40', '-alpha', '0.01', '-beta', '1.0', '-ir', '1.0'])
     main(args)
 
 

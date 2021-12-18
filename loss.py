@@ -42,6 +42,7 @@ def joint_optimization_loss(y_true, y_pred):
     """
     2018 - cvpr - Joint optimization framework for learning with noisy labels.
     """
+    print(y_true,y_pred)
     y_pred_avg = K.mean(y_pred, axis=0)
     p = np.ones(10, dtype=np.float32) / 10.
     l_p = - K.sum(K.log(y_pred_avg) * p)
