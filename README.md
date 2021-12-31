@@ -1,3 +1,5 @@
+# Reimplementaion of SL for unbalanced and Noisy MNIST dataset.
+
 # Symmetric Learning (SL) via Symmetric Cross Entropy (SCE) loss
 Code for ICCV2019 "Symmetric Cross Entropy for Robust Learning with Noisy Labels" https://arxiv.org/abs/1908.06112
 
